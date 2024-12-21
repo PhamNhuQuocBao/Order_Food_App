@@ -1,45 +1,108 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import React from "react";
+import { Tabs } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { Colors } from "@/constants/Colors";
+import { Text } from "react-native";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+const TabLayout = () => {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+    <Tabs>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name="home-outline"
+              size={24}
+              color={focused ? Colors.primary.color : color}
+            />
+          ),
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color: focused ? Colors.primary.color : color,
+                fontSize: 10,
+              }}
+            >
+              Home
+            </Text>
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="bag"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name="bag-remove-outline"
+              size={24}
+              color={focused ? Colors.primary.color : color}
+            />
+          ),
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color: focused ? Colors.primary.color : color,
+                fontSize: 10,
+              }}
+            >
+              Bag
+            </Text>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="order"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <FontAwesome5
+              name="list-alt"
+              size={24}
+              color={focused ? Colors.primary.color : color}
+            />
+          ),
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color: focused ? Colors.primary.color : color,
+                fontSize: 10,
+              }}
+            >
+              Order
+            </Text>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <AntDesign
+              name="user"
+              size={24}
+              color={focused ? Colors.primary.color : color}
+            />
+          ),
+          tabBarLabel: ({ focused, color }) => (
+            <Text
+              style={{
+                color: focused ? Colors.primary.color : color,
+                fontSize: 10,
+              }}
+            >
+              Profile
+            </Text>
+          ),
         }}
       />
     </Tabs>
   );
-}
+};
+
+export default TabLayout;

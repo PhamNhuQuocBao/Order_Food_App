@@ -1,74 +1,85 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  Button,
+  Alert,
+} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { styleHome } from "@/stylesheets/home";
+import Restaurant from "@/components/Restaurant";
+import { RESTAURANTS } from "@/constants/mock";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
+import { getRestaurants } from "@/services/restaurant";
+import { RestaurantResponse } from "@/types/restaurant";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const Home = () => {
+  const [restaurants, setRestaurants] = useState<RestaurantResponse[]>([]);
+  const router = useRouter();
 
-export default function HomeScreen() {
+  const fetch = useCallback(async () => {
+    const res = await getRestaurants();
+
+    if (res?.status === 200) {
+      setRestaurants(res.data);
+      return;
+    }
+
+    Alert.alert("Error", "Get data failed!");
+  }, []);
+
+  useEffect(() => {
+    fetch();
+  }, []);
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styleHome.container}>
+      <View style={styleHome.header}>
+        <View>
+          <Text style={{ fontWeight: "bold", fontSize: 18 }}>Deliver to:</Text>
+          <Text>24 Mai Anh Tuan</Text>
+        </View>
+      </View>
+      <View>
+        <TextInput placeholder="Search..." style={styleHome.search} />
+      </View>
+      <ScrollView>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 20,
+          }}
+        >
+          <Text style={styleHome.popularRestaurant}>Popular Restaurants</Text>
+          <TouchableOpacity>
+            <Text style={styleHome.viewAll}>View all</Text>
+          </TouchableOpacity>
+        </View>
+        <View>
+          {restaurants.map((value) => (
+            <Restaurant
+              data={value}
+              key={value._id}
+              onPress={() => {
+                router.push({
+                  pathname: `/restaurant/[id]`,
+                  params: {
+                    id: value._id,
+                  },
+                });
+              }}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default Home;
