@@ -21,6 +21,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 export default function EditProfile() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarDisplay, setAvatarDisplay] = useState("");
   const [avatarUpload, setAvatarUpload] = useState("");
@@ -77,7 +79,7 @@ export default function EditProfile() {
       const userString = await AsyncStorage.getItem("user");
       const user = JSON.parse(userString || "{}");
       const userId = user._id;
-      if (!name || !phone || !address) {
+      if (!name || !phone || !street || !city) {
         Alert.alert("Error", "Please fill all the fields!");
         return;
       }
@@ -92,7 +94,10 @@ export default function EditProfile() {
       const res = await updateProfile({
         name,
         phone,
-        address,
+        address: {
+          street,
+          city,
+        },
         avatar,
         userId,
       });
@@ -120,11 +125,13 @@ export default function EditProfile() {
     const fetchProfile = async () => {
       const profileStr = await AsyncStorage.getItem("profile");
       const profile = JSON.parse(profileStr || "{}");
-      console.log(profile);
+      const { street, city } = profile.address;
 
       setName(profile.name);
       setPhone(profile.phone);
       setAddress(profile.address);
+      setStreet(street);
+      setCity(city);
       setAvatarDisplay(profile.avatarDisplay);
     };
     fetchProfile();
@@ -160,17 +167,17 @@ export default function EditProfile() {
           <Text style={styles.label}>Street</Text>
           <TextInput
             style={styles.input}
-            value={address}
-            onChangeText={setAddress}
-            placeholder="Enter your address"
+            value={street}
+            onChangeText={setStreet}
+            placeholder="Enter your street"
           />
         </View>
         <View style={styles.inputGroup}>
           <Text style={styles.label}>City</Text>
           <TextInput
             style={styles.input}
-            value={address}
-            onChangeText={setAddress}
+            value={city}
+            onChangeText={setCity}
             placeholder="Enter your city"
           />
         </View>

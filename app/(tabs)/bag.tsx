@@ -11,7 +11,7 @@ import StackBag from "@/components/StackBag";
 import { Colors } from "@/constants/Colors";
 import Button from "@/components/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getCart } from "@/services/cart";
+import { getCart, updateItemCart } from "@/services/cart";
 import { useRouter } from "expo-router";
 
 const DELIVERY_COST = 10;
@@ -29,7 +29,7 @@ const Bag = () => {
     );
   }, []);
 
-  const updateQuantity = (
+  const updateQuantity = async (
     menuItemId: string,
     type: "increment" | "decrement"
   ) => {
@@ -53,8 +53,16 @@ const Bag = () => {
       .filter((product) => product.quantity > 0); // Remove items with 0 quantity
 
     const updatedMenus = { ...menus, products: updatedProducts };
+    await AsyncStorage.setItem("cart", JSON.stringify(updatedMenus));
     setMenus(updatedMenus);
     setSubTotal(calculateTotalPrice(updatedMenus));
+    updateCart(updatedMenus);
+  };
+
+  const updateCart = async (updatedMenus: any) => {
+    const userStr = await AsyncStorage.getItem("user");
+    const user = JSON.parse(userStr || "{}");
+    await updateItemCart(user._id, updatedMenus);
   };
 
   useEffect(() => {
@@ -70,10 +78,9 @@ const Bag = () => {
       if (res?.status === 200) {
         setMenus(res.data);
         setIsLoading(false);
+        await AsyncStorage.setItem("cart", JSON.stringify(menus));
         if (!res.data) return;
-        setSubTotal(() => {
-          return calculateTotalPrice(res.data);
-        });
+        setSubTotal(calculateTotalPrice(res.data));
         return;
       }
 

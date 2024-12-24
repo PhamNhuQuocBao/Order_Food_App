@@ -12,4 +12,7 @@ export const ENDPOINT = {
   PROFILE: {
     BASE: "profile",
   },
+  ORDER: {
+    BASE: "order",
+  },
 };

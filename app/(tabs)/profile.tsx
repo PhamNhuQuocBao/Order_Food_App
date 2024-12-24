@@ -20,7 +20,10 @@ import { getProfile } from "@/services/profile";
 import { SETTINGS } from "@/constants/mock";
 
 const Profile = () => {
-  const [address, setAddress] = useState("24 Mai Anh Tuan, Da Nang");
+  const [address, setAddress] = useState({
+    street: "",
+    city: "",
+  });
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarDisplay, setAvatarDisplay] = useState("");
@@ -40,7 +43,6 @@ const Profile = () => {
     if (path === "/editProfile") {
       router.push({
         pathname: `${path}`,
-        params: { name, address, phone, avatarDisplay },
       });
     }
   };
@@ -128,7 +130,7 @@ const Profile = () => {
                   color: Colors.gray.color,
                 }}
               >
-                {address}
+                {address.street}, {address.city}
               </Text>
               <Text
                 style={{
@@ -180,7 +182,9 @@ const Profile = () => {
                   <Text style={{ fontSize: 16, fontWeight: "500" }}>
                     Delivery address
                   </Text>
-                  <Text style={{ color: Colors.gray.color }}>{address}</Text>
+                  <Text style={{ color: Colors.gray.color }}>
+                    {address.street}, {address.city}
+                  </Text>
                 </View>
               </View>
               <Pressable

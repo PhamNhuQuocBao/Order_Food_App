@@ -31,4 +31,12 @@ export const addToCart = async (itemCart: itemCart, userId: string) => {
 
 export const removeItemCart = async () => {};
 
-export const updateItemCart = async () => {};
+export const updateItemCart = async (userId: string, products: any[]) => {
+  try {
+    const res = await APIs.put(`${ENDPOINT.CART.BASE}/${userId}`, products);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};

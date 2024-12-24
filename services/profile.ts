@@ -3,7 +3,10 @@ import { APIs } from ".";
 
 export const updateProfile = async (data: {
   name: string;
-  address: string;
+  address: {
+    street: string;
+    city: string;
+  };
   phone: string;
   avatar: string;
   userId: string;

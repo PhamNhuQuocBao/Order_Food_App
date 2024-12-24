@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, Alert, StyleSheet } from "react-native";
-import {
-  CardField,
-  useConfirmPayment,
-  useStripe,
-} from "@stripe/stripe-react-native";
-import axios from "axios";
-import { useLocalSearchParams } from "expo-router";
+import { View, Button, Alert } from "react-native";
+import { useStripe } from "@stripe/stripe-react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Details } from "@stripe/stripe-react-native/lib/typescript/src/types/components/CardFieldInput";
 import { APIs } from "@/services";
-import { logger } from "react-native-reanimated/lib/typescript/logger";
+import { createOrder } from "@/services/order";
+import { Order } from "@/types/order";
 
 const CheckoutScreen = () => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const [loading, setLoading] = useState(false);
   const { amount } = useLocalSearchParams();
+  const router = useRouter();
 
   const fetchPaymentSheetParams = async () => {
     const response = await APIs.post(`/create-payment-intent`, {
@@ -42,19 +38,16 @@ const CheckoutScreen = () => {
       return;
     }
 
-    const user = JSON.parse(userData).email;
+    const user = JSON.parse(userData);
+    const { phone, name, _id, email } = user;
 
     const { error } = await initPaymentSheet({
       merchantDisplayName: "BaoPham, Inc.",
       customerId: customer,
       customerEphemeralKeySecret: ephemeralKey,
       paymentIntentClientSecret: paymentIntent,
-      // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
-      //methods that complete payment after a delay, like SEPA Debit and Sofort.
       allowsDelayedPaymentMethods: true,
-      defaultBillingDetails: {
-        name: user,
-      },
+      defaultBillingDetails: {},
     });
     if (!error) {
       setLoading(true);
@@ -62,11 +55,35 @@ const CheckoutScreen = () => {
   };
 
   const openPaymentSheet = async () => {
-    const { error } = await presentPaymentSheet();
+    const res = await presentPaymentSheet();
+
+    const { error } = res;
 
     if (error) {
       Alert.alert(`Error code: ${error.code}`, error.message);
+      router.back();
     } else {
+      const [profile, userData, userCart] = await Promise.all([
+        AsyncStorage.getItem("profile"),
+        AsyncStorage.getItem("user"),
+        AsyncStorage.getItem("cart"),
+      ]);
+      const { name, phone, address } = JSON.parse(profile || "{}");
+      const { _id, email } = JSON.parse(userData || "{}");
+      const { products } = JSON.parse(userCart || "{}");
+
+      const order: Order = {
+        userId: _id,
+        email,
+        name,
+        phone,
+        address,
+        amount: Number(amount),
+        products,
+      };
+      const res = await createOrder(order);
+
+      console.log(res);
       Alert.alert("Success", "Your order is confirmed!");
     }
   };
