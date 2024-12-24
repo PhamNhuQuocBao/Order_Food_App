@@ -1,15 +1,31 @@
-import {
-  View,
-  Text,
-  ScrollViewBase,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
-import React from "react";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import React, { useCallback, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ItemOrder from "@/components/ItemOrder";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getOrders } from "@/services/order";
+import { OrderResponse } from "@/types/order";
 
 const Order = () => {
+  const [orders, setOrders] = React.useState<OrderResponse[]>([]);
+  const fetch = useCallback(async () => {
+    try {
+      const userStr = await AsyncStorage.getItem("user");
+      const user = JSON.parse(userStr || "{}");
+      const res = await getOrders(user._id);
+
+      if (res?.status === 200) {
+        setOrders(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
   return (
     <SafeAreaView>
       <ScrollView style={{ padding: 16 }}>
@@ -26,9 +42,8 @@ const Order = () => {
           </Text>
         </View>
         <View style={{ gap: 10 }}>
-          {[1, 2, 3].map((item, index) => (
-            <ItemOrder />
-          ))}
+          {orders.length > 0 &&
+            orders.map((item, index) => <ItemOrder key={index} data={item} />)}
         </View>
       </ScrollView>
     </SafeAreaView>

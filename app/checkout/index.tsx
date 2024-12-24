@@ -83,8 +83,15 @@ const CheckoutScreen = () => {
       };
       const res = await createOrder(order);
 
-      console.log(res);
-      Alert.alert("Success", "Your order is confirmed!");
+      if (res?.status === 400) {
+        Alert.alert("Error", "Something went wrong, please try again!");
+        return;
+      }
+      if (res?.status === 200) {
+        Alert.alert("Success", "Your order is confirmed!");
+        await AsyncStorage.removeItem("cart");
+        router.back();
+      }
     }
   };
 

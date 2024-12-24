@@ -10,3 +10,8 @@ export type Order = {
   amount: number;
   products: any[];
 };
+
+export type OrderResponse = Order & {
+  _id?: string;
+  status: string;
+};

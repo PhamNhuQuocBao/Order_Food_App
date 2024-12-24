@@ -13,6 +13,7 @@ import Button from "@/components/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getCart, updateItemCart } from "@/services/cart";
 import { useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 
 const DELIVERY_COST = 10;
 
@@ -20,6 +21,7 @@ const Bag = () => {
   const [menus, setMenus] = useState<{ userId: string; products: any[] }>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [subTotal, setSubTotal] = useState<number>(0);
+  const isFocused = useIsFocused();
   const router = useRouter();
 
   const calculateTotalPrice = useCallback((cart: any) => {
@@ -75,12 +77,17 @@ const Bag = () => {
       }
 
       const res = await getCart(JSON.parse(userData)._id);
-      if (res?.status === 200) {
-        setMenus(res.data);
+      const { status, data } = res || {};
+      console.log("STATUS: ", status);
+      console.log("DATA: ", data);
+
+      if (status === 200) {
+        console.log("SETTTTTTTTTTTTT");
+
+        setMenus(data);
         setIsLoading(false);
+        setSubTotal(calculateTotalPrice(data));
         await AsyncStorage.setItem("cart", JSON.stringify(menus));
-        if (!res.data) return;
-        setSubTotal(calculateTotalPrice(res.data));
         return;
       }
 
@@ -90,7 +97,9 @@ const Bag = () => {
         return;
       }
     };
-    fetch();
+    if (isFocused) {
+      fetch();
+    }
   }, []);
 
   return (
@@ -154,7 +163,7 @@ const Bag = () => {
                   <Text
                     style={{ fontWeight: "bold", color: Colors.primary.color }}
                   >
-                    {subTotal * (10 / 100)}
+                    5
                   </Text>
                 </View>
                 <View
@@ -167,7 +176,7 @@ const Bag = () => {
                   <Text
                     style={{ fontWeight: "bold", color: Colors.primary.color }}
                   >
-                    {subTotal + subTotal * (10 / 100)}
+                    {subTotal + 5}
                   </Text>
                 </View>
               </View>
@@ -176,14 +185,17 @@ const Bag = () => {
 
           <Button
             title="Checkout"
-            onPress={() =>
-              router.push({
-                pathname: "/checkout",
-                params: {
-                  amount: subTotal + subTotal * (10 / 100),
-                },
-              })
-            }
+            disabled={subTotal === 0}
+            onPress={() => {
+              if (subTotal > 0) {
+                router.push({
+                  pathname: "/checkout",
+                  params: {
+                    amount: subTotal + 5,
+                  },
+                });
+              }
+            }}
           />
         </SafeAreaView>
       )}

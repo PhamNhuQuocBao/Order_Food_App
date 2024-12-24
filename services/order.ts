@@ -19,3 +19,13 @@ export const createOrder = async (data: Order) => {
     } as AxiosResponse;
   }
 };
+
+export const getOrders = async (userId: string) => {
+  try {
+    const res = await APIs.get(`${ENDPOINT.ORDER.BASE}/${userId}`);
+
+    return res;
+  } catch (error) {
+    console.error(error);
+  }
+};
